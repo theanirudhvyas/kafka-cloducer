@@ -1,4 +1,5 @@
 (ns kafka-cloducer.core
+  (:require [clojure.tools.logging :as log])
   (:import [org.apache.kafka.common.serialization ByteArraySerializer StringSerializer]
            [org.apache.kafka.clients.producer KafkaProducer ProducerRecord]))
 
@@ -21,7 +22,14 @@
     (reset! producer-obj (KafkaProducer. properties)))
   @producer-obj)
 
-(defn kafka-producer
+(defn send-message
   [message]
-  (let [kafka-producer (initialize-or-get-producer (merge string-serde-config bootstrap-servers))]
+  (let [kafka-producer (initialise-or-get-producer (merge string-serde-config bootstrap-servers))]
+    (prn "sending message: " message)
     (.send kafka-producer (ProducerRecord. "test" message))))
+
+
+(defn -main []
+  (prn "sending 10 messages to kafka")
+  (doseq [message (take 10 (map #(str "test-message-" %) (range)))]
+    (send-message message)))
